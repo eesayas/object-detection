@@ -1,5 +1,6 @@
 .DS_Store
 collectedimages/
+labelimg/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
