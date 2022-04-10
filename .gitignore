@@ -1,6 +1,8 @@
 .DS_Store
 collectedimages/
 labelimg/
+test/
+train/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
