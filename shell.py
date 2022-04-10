@@ -3,6 +3,9 @@ import os
 from collect import collect
 import cv2
 from label import label
+from flagparser import flagparser
+from partition import partition
+from constants import IMAGES_FOLDER
 
 class Shell(Cmd):
   prompt = '>>> '
@@ -11,6 +14,9 @@ class Shell(Cmd):
     print('Goodbye!')
     return True
 
+  '''-------------------------------------------------------------------------------------------------
+    Collect Images
+  -------------------------------------------------------------------------------------------------'''
   def do_collect(self, inp):
     parsed = inp.split()
 
@@ -27,6 +33,10 @@ class Shell(Cmd):
     print("Use 'collect' command to collect images for labelling")
     print('Provide a limit followed by labels (ex: collect 5 thumbsup thumbsdown)')
 
+  
+  '''-------------------------------------------------------------------------------------------------
+    Label Images
+  -------------------------------------------------------------------------------------------------'''
   def do_label (self, inp):
     if len(inp.split()) > 1:
       print('Only 1 argument is permitted which is the folder of images (ex: label collectedimages)')
@@ -46,5 +56,19 @@ class Shell(Cmd):
     print("You may specify a folder of images to label or not (default to 'collectedimages' folder)")
     print("(ex: 'label' or 'label myimagefolder')")
 
+  '''-------------------------------------------------------------------------------------------------
+    Partition Images for training and testing sets
+  -------------------------------------------------------------------------------------------------'''
+  def do_partition(self, inp):
+    flags = flagparser(inp)
+    
+    if('train' not in flags or flags['train'] is False):
+      print('--train flag and value is required to run this command')
+      return
+    
+    if('folder' not in flags or flags['folder'] is False):
+      flags['folder'] = IMAGES_FOLDER
+
+    partition(flags)
 
 Shell().cmdloop()
