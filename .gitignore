@@ -3,6 +3,10 @@ collectedimages/
 labelimg/
 test/
 train/
+models/
+annotations/
+pretrained-models/
+protoc/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
