@@ -21,3 +21,5 @@ TEST_IMAGES = 'test'
 LABEL_MAP = os.path.join(ANNOTATIONS_PATH, 'label_map.pbtxt')
 TRAIN_TF_RECORD = os.path.join(ANNOTATIONS_PATH, 'train.record')
 TEST_TF_RECORD = os.path.join(ANNOTATIONS_PATH, 'test.record')
+
+TRAINING_SCRIPT = os.path.join(API_MODEL_PATH, 'research', 'object_detection', 'model_main_tf2.py')

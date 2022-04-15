@@ -5,6 +5,7 @@ import cv2
 from label import label
 from flagparser import flagparser
 from partition import partition
+from setup import setup
 from constants import IMAGES_FOLDER
 
 class Shell(Cmd):
@@ -70,5 +71,15 @@ class Shell(Cmd):
       flags['folder'] = IMAGES_FOLDER
 
     partition(flags)
+
+  '''-------------------------------------------------------------------------------------------------
+    Setup Tensorflow
+  -------------------------------------------------------------------------------------------------'''
+  def do_setup(self, inp):
+    setup()
+  
+  def help_setup(self):
+    print("Use 'setup' to install Tensorflow and setup other dependencies")
+    print("This should only be ran once since it takes a long time to install")
 
 Shell().cmdloop()
