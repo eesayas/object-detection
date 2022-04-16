@@ -1,6 +1,7 @@
 from cmd import Cmd
 import os
 from collect import collect
+from constants import IMAGES_FOLDER
 from label import label
 from flagparser import FlagParser
 from setup import setup
@@ -44,25 +45,15 @@ class Shell(Cmd):
 
   '''-------------------------------------------------------------------------------------------------
     2. Label Images
+
+    Usage: label
   -------------------------------------------------------------------------------------------------'''
-  def do_label (self, inp):
-    if len(inp.split()) > 1:
-      print('Only 1 argument is permitted which is the folder of images (ex: label collectedimages)')
-    
-    elif len(inp) == 0:
-      label(False)
-    
-    else:
-      if not os.path.exists(inp):
-        print('Image folder ' + "'" + inp + "'" + ' does not exists')
-        
-      else:
-        label(inp)
+  def do_label (self, inp):  
+    label(IMAGES_FOLDER)
     
   def help_label(self):
-    print("Use 'label' command to label images for training")
-    print("You may specify a folder of images to label or not (default to 'collectedimages' folder)")
-    print("(ex: 'label' or 'label myimagefolder')")
+    print('This command will open LabelImg to label the collected images')
+    print('Example: label')
 
   '''-------------------------------------------------------------------------------------------------
     3. Setup Tensorflow
