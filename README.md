@@ -59,7 +59,7 @@ python shell.py
 
 ### 3. (Optional) Load a pretrained model
 ```
->>> load --url <pretrained_model_url> --name <pretrained_model_name>
+>>> load --url <pretrained_model_url>
 ```
 - The shell already has [ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8](http://download.tensorflow.org/models/object_detection/tf2/20200711/ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8.tar.gz)
 - You can get more pretrained models from [Tensorflow 2 Detection Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md)

@@ -3,6 +3,7 @@ from gitclone import gitclone
 from constants import API_MODEL_PATH, PROTOC_MAC_URL, PROTOC_MAC_ZIP, PROTOC_PATH, PROTOC_WIN_URL, PROTOC_WIN_ZIP
 import shutil
 import wget
+from load import load_pretrained_model
 
 '''------------------------------------------------------------------------------
 api_model
@@ -104,6 +105,9 @@ Description: Aggregate all functions above
 def setup():
     # Download TF Models
     api_model()
+
+    # Load pretrained model
+    load_pretrained_model()
     
     # Install and run protoc
     protoc()

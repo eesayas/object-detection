@@ -2,8 +2,8 @@ from cmd import Cmd
 import os
 from collect import collect
 from constants import IMAGES_FOLDER
-from label import label
 from flagparser import FlagParser
+from load import load_pretrained_model
 # from detect_realtime import detect_realtime
 # from detect_image import detect_image
 
@@ -52,19 +52,43 @@ class Shell(Cmd):
   '''-------------------------------------------------------------------------------------------------
     2. Label Images
   -------------------------------------------------------------------------------------------------'''
-  def do_label (self, inp):  
-    label(IMAGES_FOLDER)
+  def do_label (self, inp): 
+    flags = FlagParser(inp)
+
+    if not flags.get('folder'):
+      print('No folder passed default to {}'.format(IMAGES_FOLDER))
+    
+    folder = flags.get('folder') or IMAGES_FOLDER
+
+    os.system('labelImg {}'.format(folder))
     
   def help_label(self):
     print('This command will open LabelImg to label the collected images')
-    print('Example: label')
+    print('Example: label --folder <images_folder>')
+    print('folder is optional')
+
+  '''-------------------------------------------------------------------------------------------------
+    3. (Optional Load pretrained model
+  -------------------------------------------------------------------------------------------------'''
+  def do_load(self, inp):
+    flags = FlagParser(inp)
+    if not flags.get('url'):
+      print('You must provide the url of the pretained model (ex: --url <pretrained_model_url>')
+      return
+        
+    url = flags.get('url')
+    load_pretrained_model(url)
+
+  def help_load(self):
+    print('This command will download a pretrained model from Tensorflow 2 Detection Model Zoo')
+    print('Example: load --url <pretrained_model_url>')
+    print('See: https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md')
 
   '''-------------------------------------------------------------------------------------------------
     4. Train model (flags: --model, --labels, --train )
   -------------------------------------------------------------------------------------------------'''
   def train(self, inp):
     flags = FlagParser(inp)
-    
 
   '''-------------------------------------------------------------------------------------------------
     5. Detect using TFOD
