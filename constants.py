@@ -12,6 +12,8 @@ API_MODEL_PATH = 'models'
 PROTOC_PATH = 'protoc'
 PROTOC_MAC_ZIP = 'protoc-3.20.0-osx-x86_64.zip'
 PROTOC_MAC_URL = 'https://github.com/protocolbuffers/protobuf/releases/download/v3.20.0/protoc-3.20.0-osx-x86_64.zip'
+PROTOC_WIN_ZIP =  'protoc-3.20.0-win64.zip'
+PROTOC_WIN_URL = 'https://github.com/protocolbuffers/protobuf/releases/download/v3.20.0/protoc-3.20.0-win64.zip'
 
 ANNOTATIONS_PATH = 'annotations'
 TF_RECORD_SCRIPT = 'generate_tfrecord.py'

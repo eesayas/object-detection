@@ -1,6 +1,6 @@
 import os
 from gitclone import gitclone
-from constants import API_MODEL_PATH, PRETRAINED_MODEL_NAME, PRETRAINED_MODEL_URL, PRETRAINED_MODEL_PATH, PROTOC_MAC_URL, PROTOC_MAC_ZIP, PROTOC_PATH
+from constants import API_MODEL_PATH, PROTOC_MAC_URL, PROTOC_MAC_ZIP, PROTOC_PATH, PROTOC_WIN_URL, PROTOC_WIN_ZIP
 import shutil
 import wget
 
@@ -11,33 +11,11 @@ Description: Download the api model
 ------------------------------------------------------------------------------'''
 def api_model():
     if os.path.exists(API_MODEL_PATH):
-        shutil.rmtree(API_MODEL_PATH)
+        print('Tensorflow API Model already downloaded')
+        return
     
     os.mkdir(API_MODEL_PATH)
-
     gitclone('https://github.com/tensorflow/models', API_MODEL_PATH)
-
-'''------------------------------------------------------------------------------
-pretrained_model
-
-Description: Download the pretrained model
-Arguments:
-- url: the download url
-- name: the name of the model
-------------------------------------------------------------------------------'''
-def pretrained_model(url, name):
-    if os.path.exists(PRETRAINED_MODEL_PATH):
-        shutil.rmtree(PRETRAINED_MODEL_PATH)
-
-    os.mkdir(PRETRAINED_MODEL_PATH)
-
-    wget.download(url)
-
-    tarfile = '{}.tar.gz'.format(name)
-
-    shutil.unpack_archive(tarfile, PRETRAINED_MODEL_PATH)
-
-    os.remove(tarfile)
 
 '''------------------------------------------------------------------------------
 protoc
@@ -66,7 +44,16 @@ def protoc():
         os.system('cd {}/models/research && protoc object_detection/protos/*.proto --python_out=.'.format(os.getcwd()))
 
     if os.name == 'nt':
-        print('Need to implement for windows')
+        # download protoc for windows
+        wget.download(PROTOC_WIN_URL)
+        shutil.unpack_archive(PROTOC_WIN_ZIP, PROTOC_PATH)
+        os.remove(PROTOC_WIN_ZIP)
+
+        # add protoc to path
+        os.environ['PATH'] += os.pathsep + os.path.abspath(os.path.join(PROTOC_PATH, 'bin'))  
+
+        # run
+        os.system('cd {}/models/research && protoc object_detection/protos/*.proto --python_out=.'.format(os.getcwd()))
 
 '''------------------------------------------------------------------------------
 installTF
@@ -104,14 +91,15 @@ setup
 
 Description: Aggregate all functions above
 ------------------------------------------------------------------------------'''
-def setup(url = PRETRAINED_MODEL_URL, name = PRETRAINED_MODEL_NAME):
-    # Download TF Models Pretrained Models from Tensorflow Model Zoo and Install TFOD
+def setup():
+    # Download TF Models
     api_model()
-    pretrained_model(url, name)
     
     # Install and run protoc
     protoc()
-    installTF()
+    # installTF()
 
     # Verify Tensorflow
-    verify()
+    # verify()
+
+setup()
