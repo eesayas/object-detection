@@ -6,6 +6,7 @@ from label import label
 from flagparser import flagparser
 from partition import partition
 from setup import setup
+from detect_realtime import detect_realtime
 from constants import IMAGES_FOLDER
 
 class Shell(Cmd):
@@ -81,5 +82,15 @@ class Shell(Cmd):
   def help_setup(self):
     print("Use 'setup' to install Tensorflow and setup other dependencies")
     print("This should only be ran once since it takes a long time to install")
+
+  '''-------------------------------------------------------------------------------------------------
+    Detect using TFOD
+  -------------------------------------------------------------------------------------------------'''
+  def do_detect(self, inp):
+    flags = flagparser(inp)
+
+
+    # type = flags  
+
 
 Shell().cmdloop()
