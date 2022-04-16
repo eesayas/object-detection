@@ -1,8 +1,8 @@
-# object-detection
+# Tensorflow Object Detection Shell
 
-An object detection course that uses machine learning
+## Setup The Shell
 
-## Creating and activating a python virtual environment
+### 1. Creating and activating a python virtual environment
 
 ```
 # We may not need to run this
@@ -15,14 +15,14 @@ source env/bin/activate
 .\env\Scripts\activate
 ```
 
-## Run the shell
+### 2. Install all dependencies
 
 ```
-python3 shell.py
+pip install -r requirements.txt
 ```
 
-# cli commands
+### 3. Run the shell
 
-fcod collect thumbsup thumbsdown
-fcod train ./images
-fcod
+```
+python shell.py
+```
