@@ -1,22 +1,18 @@
-import shutil
-from tkinter.tix import IMAGE
-import numpy as np
 import cv2
-from constants import IMAGES_FOLDER
 import uuid
 import os
 
 def config_title(label, current, limit):
   return "Collecting {}  ({} of {}). Press 'c' to capture.".format(label, current, limit)
 
-def collect(limit, labels):
+def collect(limit, labels, folder):
 
   # Setup folders
-  if not os.path.exists(IMAGES_FOLDER):
-    os.mkdir(IMAGES_FOLDER)
+  if not os.path.exists(folder):
+    os.mkdir(folder)
 
   for label in labels:
-    path = os.path.join(IMAGES_FOLDER, label)
+    path = os.path.join(folder, label)
     if not os.path.exists(path):
       os.mkdir(path)
 
@@ -30,7 +26,8 @@ def collect(limit, labels):
 
   while True:
     ret, frame = cap.read()
-    cv2.imshow(title, frame)
+    cv2.imshow('tfod', frame)
+    cv2.setWindowTitle('tfod', title)
 
     keypressed = cv2.waitKey(1)
     if keypressed == ord('c'):
@@ -40,7 +37,7 @@ def collect(limit, labels):
         continue
 
       # capture current image
-      imgname = os.path.join(IMAGES_FOLDER, labels[labelIndex], labels[labelIndex] + '.' + '{}.jpg'.format(str(uuid.uuid1())))
+      imgname = os.path.join(folder, labels[labelIndex], labels[labelIndex] + '.' + '{}.jpg'.format(str(uuid.uuid1())))
       cv2.imwrite(imgname, frame)
 
       # queue next image
@@ -62,7 +59,7 @@ def collect(limit, labels):
       break
 
   print('Closing camera')
-  print('Images saved in {}'.format(os.path.join(os.getcwd(), IMAGES_FOLDER)))
+  print('Images saved in {}'.format(os.path.join(os.getcwd(), folder)))
 
   cap.release()
   cv2.destroyAllWindows()
