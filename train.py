@@ -1,10 +1,93 @@
 import os
 import shutil
-from constants import ANNOTATIONS_PATH, API_MODEL_PATH, LABEL_MAP, PRETRAINED_MODEL_NAME, PRETRAINED_MODEL_PATH, TEST_IMAGES, TEST_TF_RECORD, TF_RECORD_SCRIPT, TRAIN_IMAGES, TRAIN_TF_RECORD, TRAINING_SCRIPT
+from constants import ANNOTATIONS_PATH, API_MODEL_PATH, IMAGES_FOLDER, LABEL_MAP, PRETRAINED_MODEL_NAME, PRETRAINED_MODEL_PATH, TEST_IMAGES, TEST_TF_RECORD, TF_RECORD_SCRIPT, TRAIN_IMAGES, TRAIN_TF_RECORD, TRAINING_SCRIPT
 import tensorflow as tf
 from object_detection.protos import pipeline_pb2
 from google.protobuf import text_format
 
+'''--------------------------------------------------------
+check_labeling
+
+Description: check if all jpgs are labeled
+Args:
+- jpgs: dictonary of sets ( ex: { label: { jpg1, jpg2 } } )
+- xmls: dictonary of sets ( ex: { label: { xml1, xml2 } } )
+--------------------------------------------------------'''
+def check_labeling(jpgs, xmls):
+    unlabeled = []
+
+    for label in jpgs:
+        for jpg in jpgs[label].difference(xmls[label]):
+            unlabeled.append(jpg)
+    
+    return unlabeled
+
+'''------------------------------------------------------------------------
+partition
+
+Description: Partition to train and test samples from collectedimages
+Arguments:
+- number_of_trainees: population of sample of training set for each label
+-------------------------------------------------------------------------'''
+def partition(number_of_trainees):
+    jpgs = {}
+    xmls = {}
+    index = 0
+
+    for subdir, dirs, files in os.walk(IMAGES_FOLDER):
+        for file in files:
+            file_name, file_extension = os.path.splitext(file)
+            if file_extension == '.jpg':
+                # initialize set if not existing
+                if subdir not in jpgs:
+                    jpgs[subdir] = set([])
+
+                # add jpg
+                jpgs[subdir].add(os.path.join(subdir, file_name))
+
+            elif file_extension == '.xml':
+                # initialize set if not existing
+                if subdir not in xmls:
+                    xmls[subdir] = set([])
+
+                # add xml
+                xmls[subdir].add(os.path.join(subdir, file_name))
+
+    # check if some jpgs are unlabeled
+    unlabeled = check_labeling(jpgs, xmls)
+    if len(unlabeled) > 0:
+        for jpg in unlabeled:
+            print("An image is unlabelled. Please run: label {}.jpg".format(jpg))
+
+    # create train and test dir
+    if not os.path.exists('train'):
+        os.mkdir('train')
+
+    if not os.path.exists('test'):
+        os.mkdir('test')
+
+    # convert sets to list for indexing
+    for label in jpgs:
+        jpgs[label] = list(jpgs[label])
+    
+    for label in xmls:
+        xmls[label] = list(xmls[label])
+
+    # move to training dir
+    while index < number_of_trainees:
+
+        for label in jpgs:
+            shutil.move(jpgs[label][index] + '.jpg', 'train')
+            shutil.move(xmls[label][index] + '.xml', 'train')
+
+        index+=1
+    
+    # move remaining to testing dir
+    for subdir, dirs, files in os.walk(IMAGES_FOLDER):
+        for file in files:
+            file_name, file_extension = os.path.splitext(file)
+            if file_extension in ['.jpg', '.xml']:
+                shutil.move(os.path.join(subdir, file), 'test')  
 
 '''------------------------------------------------------------------------------
 create_label_map
@@ -98,12 +181,15 @@ def update_pipeline_config(number_of_labels, model_name):
     return custom_model_path
 
 
-def train(labels, model_name):
+def train(labels, model_name, number_of_trainees):
+    # do partition
+    partition(number_of_trainees)
+
     # Create Label Map
-    # create_label_map(labels)
+    create_label_map(labels)
 
     # Create TF Records
-    # create_tf_records()
+    create_tf_records()
 
     # Update Config for Transfer Learning
     custom_model_path = update_pipeline_config(len(labels), model_name)
@@ -111,5 +197,3 @@ def train(labels, model_name):
     # Train
     NUM_TRAIN_STEPS = 2000
     os.system('python {} --model_dir={} --pipeline_config_path={} --num_train_steps={}'.format(TRAINING_SCRIPT, custom_model_path, os.path.join(custom_model_path, 'pipeline.config'), NUM_TRAIN_STEPS))
-
-train(['ThumbsDown', 'ThumbsUp'], 'my-model')

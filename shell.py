@@ -1,13 +1,11 @@
 from cmd import Cmd
 import os
 from collect import collect
-import cv2
 from label import label
-from flagparser import flagparser
-from partition import partition
+from flagparser import FlagParser
 from setup import setup
 from detect_realtime import detect_realtime
-from constants import IMAGES_FOLDER
+from detect_image import detect_image
 
 class Shell(Cmd):
   prompt = '>>> '
@@ -17,27 +15,35 @@ class Shell(Cmd):
     return True
 
   '''-------------------------------------------------------------------------------------------------
-    Collect Images
+    1. Collect Images
+
+    Usage: collect --limit 5 --labels thumbsup thumbsdown
   -------------------------------------------------------------------------------------------------'''
   def do_collect(self, inp):
-    parsed = inp.split()
+    flags = FlagParser(inp)
 
-    if len(parsed) < 2:
-      print('Need to provide limit and labels (ex: collect 5 thumbsup thumbsdown)')
+    if not flags.get('limit'):
+      print('No limit passed default to 5')
     
-    elif parsed[0].isnumeric() == False:
-      print('First argument must be a number followed by labels (ex: collect 5 thumbsup thumbsdown)')
-
     else:
-      collect(parsed.pop(0), parsed)
+      if not str(flags.get('limit')).isnumeric():
+        print('Passed limit must be a number')
+        return
+    
+    limit = flags.get('limit') or 5 # default limit is 5
+
+    if not flags.get('labels'):
+      print('You must provide labels (ex: --labels thumbsup thumbsdown)')
+      return
+
+    collect(limit, flags.get('labels'))
 
   def help_collect(self):
-    print("Use 'collect' command to collect images for labelling")
-    print('Provide a limit followed by labels (ex: collect 5 thumbsup thumbsdown)')
+    print('This command will collect images for training and testing')
+    print('Example: collect --limit 5 --labels thumbsup thumbsdown')
 
-  
   '''-------------------------------------------------------------------------------------------------
-    Label Images
+    2. Label Images
   -------------------------------------------------------------------------------------------------'''
   def do_label (self, inp):
     if len(inp.split()) > 1:
@@ -59,22 +65,7 @@ class Shell(Cmd):
     print("(ex: 'label' or 'label myimagefolder')")
 
   '''-------------------------------------------------------------------------------------------------
-    Partition Images for training and testing sets
-  -------------------------------------------------------------------------------------------------'''
-  def do_partition(self, inp):
-    flags = flagparser(inp)
-    
-    if('train' not in flags or flags['train'] is False):
-      print('--train flag and value is required to run this command')
-      return
-    
-    if('folder' not in flags or flags['folder'] is False):
-      flags['folder'] = IMAGES_FOLDER
-
-    partition(flags)
-
-  '''-------------------------------------------------------------------------------------------------
-    Setup Tensorflow
+    3. Setup Tensorflow
   -------------------------------------------------------------------------------------------------'''
   def do_setup(self, inp):
     setup()
@@ -84,13 +75,40 @@ class Shell(Cmd):
     print("This should only be ran once since it takes a long time to install")
 
   '''-------------------------------------------------------------------------------------------------
-    Detect using TFOD
+    4. Train model (flags: --model, --labels, --train )
+  -------------------------------------------------------------------------------------------------'''
+  def train(self, inp):
+    flags = FlagParser(inp)
+    
+
+
+  '''-------------------------------------------------------------------------------------------------
+    5. Detect using TFOD
   -------------------------------------------------------------------------------------------------'''
   def do_detect(self, inp):
-    flags = flagparser(inp)
+    flags = FlagParser(inp)
 
+    type = flags.get('type') or 'realtime' # realtime is default
 
-    # type = flags  
+    model = flags.get('model')
+    if model is False:
+      print('--model is required')
+      return
 
+    if type == 'image':
+      if not flags.get('image'):
+        print('You must provide an image to detect (ex: --image path_to_image)')
+        return
+
+      image = flags.get('image')
+
+      if not os.path.exists(image):
+        print('The provide image does not exists')
+        return
+
+      detect_image(model, image)
+
+    elif type == 'realtime':
+      detect_realtime(model)
 
 Shell().cmdloop()

@@ -1,31 +1,32 @@
+import shutil
+from tkinter.tix import IMAGE
 import numpy as np
 import cv2
 from constants import IMAGES_FOLDER
 import uuid
 import os
 
-def configFrameTitle(label, current, limit):
-  return 'Collecting ' + label + ' (' + str(current) + ' of ' + str(limit) + "). Press 'c' to capture."
-
-def setupFolders(labels):
-  if not os.path.exists(IMAGES_FOLDER):
-    os.mkdir(IMAGES_FOLDER)
-  
-  for label in labels:
-    path = os.path.join(IMAGES_FOLDER, label)
-    if not os.path.exists(path):
-        os.mkdir(path)
+def config_title(label, current, limit):
+  return "Collecting {}  ({} of {}). Press 'c' to capture.".format(label, current, limit)
 
 def collect(limit, labels):
 
-  setupFolders(labels)
+  # Setup folders
+  if not os.path.exists(IMAGES_FOLDER):
+    os.mkdir(IMAGES_FOLDER)
+
+  for label in labels:
+    path = os.path.join(IMAGES_FOLDER, label)
+    if not os.path.exists(path):
+      os.mkdir(path)
 
   limit = int(limit)
   cap = cv2.VideoCapture(0)
+  print('Opening camera...')
   
   current = 1
   labelIndex = 0
-  title = configFrameTitle(labels[labelIndex], current, limit)
+  title = config_title(labels[labelIndex], current, limit)
 
   while True:
     ret, frame = cap.read()
@@ -55,10 +56,13 @@ def collect(limit, labels):
         title = "All labels are captured. Please press 'q' to quit"
       
       else:
-        title = configFrameTitle(labels[labelIndex], current, limit)
+        title = config_title(labels[labelIndex], current, limit)
 
     elif keypressed == ord('q'):
       break
+
+  print('Closing camera')
+  print('Images saved in {}'.format(os.path.join(os.getcwd(), IMAGES_FOLDER)))
 
   cap.release()
   cv2.destroyAllWindows()

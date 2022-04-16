@@ -1,7 +1,7 @@
 import os
 
-IMAGES_FOLDER = "collectedimages"
-LABELIMG_PATH = "labelimg"
+IMAGES_FOLDER = 'collectedimages'
+LABELIMG_PATH = 'labelimg'
 
 PRETRAINED_MODEL_PATH = 'pretrained-models'
 PRETRAINED_MODEL_NAME = 'ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8'
