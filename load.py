@@ -3,6 +3,15 @@ from constants import PRETRAINED_MODEL_NAME, PRETRAINED_MODEL_PATH, PRETRAINED_M
 import wget
 import shutil
 
+
+'''------------------------------------------------------------------------------
+load_pretrained_model
+
+Description: Download a pretrained model
+Arguments:
+- number_of_labels:
+- model_name: 
+------------------------------------------------------------------------------'''
 def load_pretrained_model(url = PRETRAINED_MODEL_URL, name = PRETRAINED_MODEL_NAME):
 
     # if pretrained models folder does not exists

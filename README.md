@@ -21,15 +21,15 @@ source env/bin/activate
 .\env\Scripts\activate
 ```
 
-### 3. Run setup.py
+### 3. Install requirements
+```
+pip install -r requirements.txt
+```
+
+### 4. Run setup.py
 
 ```
 python setup.py
-```
-
-### 4. Install requirements
-```
-pip install -r requirements.txt
 ```
 
 ### 5. Run the shell

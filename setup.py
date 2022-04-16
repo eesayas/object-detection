@@ -56,11 +56,11 @@ def protoc():
         os.system('cd {}/models/research && protoc object_detection/protos/*.proto --python_out=.'.format(os.getcwd()))
 
 '''------------------------------------------------------------------------------
-installTF
+installTFDeps
 
-Description: Install tensorflow and its dependencies
+Description: Install tensorflow dependencies
 ------------------------------------------------------------------------------'''
-def installTF():
+def installTFDeps():
     if not os.path.exists('models'):
         raise Exception('Models from Tensorflow Garden must be downloaded first')
 
@@ -72,7 +72,18 @@ def installTF():
         os.system('python -m pip install .')
 
     if os.name == 'nt':
-        print('Windows implentation to be done')    
+        # prevent no module
+        os.system('pip install tensorflow --upgrade')
+        os.system('pip uninstall protobuf matplotlib -y')
+        os.system('pip install protobuf matplotlib==3.2')
+        os.system('pip install Pillow')
+        os.system('pip install pyyaml')
+
+        os.chdir(os.path.join(currentdir, 'models', 'research'))
+        shutil.copy(os.path.join('object_detection', 'packages', 'tf2', 'setup.py'), 'setup.py')
+        os.system('python setup.py build')
+        os.system('python setup.py install')
+        os.system('cd slim && pip install -e .')
 
     os.chdir(currentdir) # reset
 
@@ -85,7 +96,6 @@ def verify():
     verification_script = os.path.join(API_MODEL_PATH, 'research', 'object_detection', 'builders', 'model_builder_tf2_test.py')
     os.system('python {}'.format(verification_script))
 
-
 '''------------------------------------------------------------------------------
 setup
 
@@ -97,9 +107,9 @@ def setup():
     
     # Install and run protoc
     protoc()
-    # installTF()
+    installTFDeps()
 
     # Verify Tensorflow
-    # verify()
+    verify()
 
 setup()
