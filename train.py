@@ -59,12 +59,16 @@ def partition(number_of_trainees):
         for jpg in unlabeled:
             print("An image is unlabelled. Please run: label {}.jpg".format(jpg))
 
-    # create train and test dir
-    if not os.path.exists('train'):
-        os.mkdir('train')
+    # Reset train and test folders
+    if os.path.exists(TRAIN_IMAGES):
+        shutil.rmtree(TRAIN_IMAGES)
+    
+    os.mkdir(TRAIN_IMAGES)
 
-    if not os.path.exists('test'):
-        os.mkdir('test')
+    if os.path.exists('test'):
+        shutil.rmtree(TRAIN_IMAGES)
+    
+    os.mkdir(TRAIN_IMAGES)
 
     # convert sets to list for indexing
     for label in jpgs:

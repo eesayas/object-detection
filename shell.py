@@ -17,8 +17,6 @@ class Shell(Cmd):
 
   '''-------------------------------------------------------------------------------------------------
     1. Collect Images
-
-    Usage: collect --limit 5 --labels thumbsup thumbsdown
   -------------------------------------------------------------------------------------------------'''
   def do_collect(self, inp):
     flags = FlagParser(inp)
@@ -41,12 +39,11 @@ class Shell(Cmd):
 
   def help_collect(self):
     print('This command will collect images for training and testing')
-    print('Example: collect --limit 5 --labels thumbsup thumbsdown')
+    print('Example: collect --limit <limit> --labels <label1> <label2>')
+    print('limit is optional')
 
   '''-------------------------------------------------------------------------------------------------
     2. Label Images
-
-    Usage: label
   -------------------------------------------------------------------------------------------------'''
   def do_label (self, inp):  
     label(IMAGES_FOLDER)
@@ -59,11 +56,17 @@ class Shell(Cmd):
     3. Setup Tensorflow
   -------------------------------------------------------------------------------------------------'''
   def do_setup(self, inp):
-    setup()
+    flags = FlagParser(inp)
+
+    if flags['pretrained-url'] and flags['pretrained-name']:
+      setup(flags['pretrained-url'], flags['pretrained-name'])
+    else:
+      setup()
   
   def help_setup(self):
-    print("Use 'setup' to install Tensorflow and setup other dependencies")
-    print("This should only be ran once since it takes a long time to install")
+    print('This command will install Tensorflow and setup other dependencies')
+    print('Example: setup --pretrained-url <url> --pretrained-name <name>')
+    print('pretrained-url and pretrained-name are optional')
 
   '''-------------------------------------------------------------------------------------------------
     4. Train model (flags: --model, --labels, --train )
@@ -71,7 +74,6 @@ class Shell(Cmd):
   def train(self, inp):
     flags = FlagParser(inp)
     
-
 
   '''-------------------------------------------------------------------------------------------------
     5. Detect using TFOD

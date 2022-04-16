@@ -25,7 +25,7 @@ Arguments:
 - url: the download url
 - name: the name of the model
 ------------------------------------------------------------------------------'''
-def pretrained_model(url = PRETRAINED_MODEL_URL, name = PRETRAINED_MODEL_NAME):
+def pretrained_model(url, name):
     if os.path.exists(PRETRAINED_MODEL_PATH):
         shutil.rmtree(PRETRAINED_MODEL_PATH)
 
@@ -57,7 +57,7 @@ def protoc():
         os.remove(PROTOC_MAC_ZIP)
 
         # permissions 
-        os.system("chmod +x protoc/bin/protoc")
+        os.system('chmod +x protoc/bin/protoc')
 
         # add protoc to path
         os.environ['PATH'] = os.path.join(os.getcwd(), 'protoc', 'bin') + ':' + os.environ['PATH']
@@ -104,10 +104,10 @@ setup
 
 Description: Aggregate all functions above
 ------------------------------------------------------------------------------'''
-def setup():
+def setup(url = PRETRAINED_MODEL_URL, name = PRETRAINED_MODEL_NAME):
     # Download TF Models Pretrained Models from Tensorflow Model Zoo and Install TFOD
     api_model()
-    pretrained_model()
+    pretrained_model(url, name)
     
     # Install and run protoc
     protoc()
