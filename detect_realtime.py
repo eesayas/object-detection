@@ -1,14 +1,9 @@
 import os
 import tensorflow as tf
-from object_detection.utils import label_map_util
-from object_detection.utils import visualization_utils as viz_utils
-from object_detection.builders import model_builder
-from object_detection.utils import config_util
 import cv2
 import numpy as np
 from constants import API_MODEL_PATH, LABEL_MAP
 from detect_common import find_latest_ckpt
-
 
 '''----------------------------------------------------------------------------
 detect_realtime
@@ -18,6 +13,11 @@ Arguments:
 - model_name: the name of trained model
 ------------------------------------------------------------------------------'''
 def detect_realtime(model_name):
+    from object_detection.utils import label_map_util
+    from object_detection.utils import visualization_utils as viz_utils
+    from object_detection.builders import model_builder
+    from object_detection.utils import config_util
+
     model_path = os.path.join(API_MODEL_PATH, model_name)
     pipeline_config = os.path.join(model_path, 'pipeline.config')
 
@@ -66,7 +66,7 @@ def detect_realtime(model_name):
             category_index,
             use_normalized_coordinates=True,
             max_boxes_to_draw=5,
-            min_score_thresh=.75,
+            min_score_thresh=.8,
             agnostic_mode=False)
 
         cv2.imshow("Object Detection Model: {} (Press 'q' to quit)".format(model_name),  image_np_with_detections)

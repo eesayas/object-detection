@@ -1,12 +1,11 @@
 from cmd import Cmd
 import os
 from collect import collect
-from constants import API_MODEL_PATH, IMAGES_FOLDER
+from constants import IMAGES_FOLDER
 from flagparser import FlagParser
 from load import load_pretrained_model
 from train import train
-# from detect_realtime import detect_realtime
-# from detect_image import detect_image
+from detect_realtime import detect_realtime
 
 class Shell(Cmd):
   prompt = '>>> '
@@ -133,32 +132,18 @@ class Shell(Cmd):
     train(model, labels, folder, sample, pretrained, steps)
 
   '''-------------------------------------------------------------------------------------------------
-    5. Detect using TFOD
+    5. Test a trained model
   -------------------------------------------------------------------------------------------------'''
-  # def do_detect(self, inp):
-  #   flags = FlagParser(inp)
+  def do_test(self, inp):
+    flags = FlagParser(inp)
 
-  #   type = flags.get('type') or 'realtime' # realtime is default
+    model = flags.get('model')
 
-  #   model = flags.get('model')
-  #   if model is False:
-  #     print('--model is required')
-  #     return
-
-  #   if type == 'image':
-  #     if not flags.get('image'):
-  #       print('You must provide an image to detect (ex: --image path_to_image)')
-  #       return
-
-  #     image = flags.get('image')
-
-  #     if not os.path.exists(image):
-  #       print('The provide image does not exists')
-  #       return
-
-      # detect_image(model, image)
-
-    # elif type == 'realtime':
-      # detect_realtime(model)
+    if not model:
+      print('You must provide a model (ex: --model <model_name>)')
+      return
+    
+    print('Opening webcam. Please wait...')
+    detect_realtime(model)
 
 Shell().cmdloop()

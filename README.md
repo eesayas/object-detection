@@ -77,8 +77,5 @@ python shell.py
 ### 5. Test trained model
 ```
 # Test in realtime (via webcam)
->>> test --type realtime --model <your_model_name>
-
-# Test with an image
->>> test --type image --model <your_model_name> --image <image_path>
+>>> test --model <your_model_name>
 ```
