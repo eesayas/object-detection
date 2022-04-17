@@ -67,9 +67,9 @@ python shell.py
 ### 4. Train a model
 ```
 # Using all options
->>> train --model <your_model_name> --labels <label1> <label2> --train <number_of_trainees> --pretrained <pretrained_model_name>
+>>> train --model <your_model_name> --labels <label1> <label2> --sample <sample_size> --pretrained <pretrained_model_name> --steps <number_of_steps> --folder <images_folder>
 
-# Using minimal options (pretrained=ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8)
+# Using minimal options (pretrained=ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8, steps=2000m, folder=collectedimages )
 >>> train --model <your_model_name> --labels <label1> <label2> --train <number_of_trainees>
 
 ```

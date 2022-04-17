@@ -1,9 +1,10 @@
 from cmd import Cmd
 import os
 from collect import collect
-from constants import IMAGES_FOLDER
+from constants import API_MODEL_PATH, IMAGES_FOLDER
 from flagparser import FlagParser
 from load import load_pretrained_model
+from train import train
 # from detect_realtime import detect_realtime
 # from detect_image import detect_image
 
@@ -87,8 +88,49 @@ class Shell(Cmd):
   '''-------------------------------------------------------------------------------------------------
     4. Train model (flags: --model, --labels, --train )
   -------------------------------------------------------------------------------------------------'''
-  def train(self, inp):
+  def do_train(self, inp):
     flags = FlagParser(inp)
+
+    # Steps
+    if not flags.get('steps'):
+      print('No steps provided default to 2000')
+    
+    steps = flags.get('steps') or 2000
+
+    # Pretrained
+    if not flags.get('pretrained'):
+      print('No pretrained model provided default to ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8')
+
+    pretrained = flags.get('pretrained') or 'ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8'
+
+    # Folder
+    if not flags.get('folder'):
+      print('No image folder provided default to {}'.format(IMAGES_FOLDER))
+
+    folder = flags.get('folder') or IMAGES_FOLDER
+
+    # Model
+    if not flags.get('model'):
+      print('You must provide a name for your model (ex: --model <model_name>)')
+      return
+
+    model = flags.get('model')
+
+    # Labels
+    if not flags.get('labels'):
+      print('You must provide labels (ex: --labels <label1> <label2>)')
+      return
+
+    labels = flags.get('labels')
+
+    # Sample
+    if not flags.get('sample'):
+      print('You must indicate number of images to be trained (ex: --train 3)')
+      return
+
+    sample = flags.get('sample')
+
+    train(model, labels, folder, sample, pretrained, steps)
 
   '''-------------------------------------------------------------------------------------------------
     5. Detect using TFOD

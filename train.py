@@ -27,14 +27,16 @@ partition
 
 Description: Partition to train and test samples from collectedimages
 Arguments:
+
+- folder: image folder containg collected images
 - number_of_trainees: population of sample of training set for each label
 -------------------------------------------------------------------------'''
-def partition(number_of_trainees):
+def partition(folder, trainees):
     jpgs = {}
     xmls = {}
     index = 0
 
-    for subdir, dirs, files in os.walk(IMAGES_FOLDER):
+    for subdir, dirs, files in os.walk(folder):
         for file in files:
             file_name, file_extension = os.path.splitext(file)
             if file_extension == '.jpg':
@@ -57,7 +59,7 @@ def partition(number_of_trainees):
     unlabeled = check_labeling(jpgs, xmls)
     if len(unlabeled) > 0:
         for jpg in unlabeled:
-            print("An image is unlabelled. Please run: label {}.jpg".format(jpg))
+            raise("An image is unlabelled. Please run: label {}.jpg".format(jpg))
 
     # Reset train and test folders
     if os.path.exists(TRAIN_IMAGES):
@@ -65,10 +67,10 @@ def partition(number_of_trainees):
     
     os.mkdir(TRAIN_IMAGES)
 
-    if os.path.exists('test'):
-        shutil.rmtree(TRAIN_IMAGES)
+    if os.path.exists(TEST_IMAGES):
+        shutil.rmtree(TEST_IMAGES)
     
-    os.mkdir(TRAIN_IMAGES)
+    os.mkdir(TEST_IMAGES)
 
     # convert sets to list for indexing
     for label in jpgs:
@@ -77,21 +79,23 @@ def partition(number_of_trainees):
     for label in xmls:
         xmls[label] = list(xmls[label])
 
-    # move to training dir
-    while index < number_of_trainees:
-
+    # copy to training dir
+    counter = 0
+    while counter < trainees:
         for label in jpgs:
-            shutil.move(jpgs[label][index] + '.jpg', 'train')
-            shutil.move(xmls[label][index] + '.xml', 'train')
+            # copy from path and remove from list
+            shutil.copy(jpgs[label].pop() + '.jpg', TRAIN_IMAGES)
 
-        index+=1
+            # same with xmls
+            shutil.copy(xmls[label].pop() + '.xml', TRAIN_IMAGES)
+        
+        counter+=1
     
-    # move remaining to testing dir
-    for subdir, dirs, files in os.walk(IMAGES_FOLDER):
-        for file in files:
-            file_name, file_extension = os.path.splitext(file)
-            if file_extension in ['.jpg', '.xml']:
-                shutil.move(os.path.join(subdir, file), 'test')  
+    # copy remaining to testing dir
+    for label in jpgs:
+        while len(jpgs[label]) > 0:
+            shutil.copy(jpgs[label].pop() + '.jpg', TEST_IMAGES)
+            shutil.copy(xmls[label].pop() + '.xml', TEST_IMAGES)
 
 '''------------------------------------------------------------------------------
 create_label_map
@@ -133,6 +137,9 @@ Description: Create TF records
 ------------------------------------------------------------------------------'''
 def create_tf_records():
 
+    if os.name == 'nt':
+        os.system('pip install pytz')
+
     print('Creating TF record for training...')
     os.system('python {} -x {} -l {} -o {}'.format(TF_RECORD_SCRIPT, TRAIN_IMAGES, LABEL_MAP, TRAIN_TF_RECORD))
     
@@ -145,15 +152,16 @@ update_pipeline_config
 
 Description: Update Config for Transfer Learning
 Arguments:
-- number_of_labels:
-- model_name: 
+- number_of_labels: how many labels
+- custom_model: the model name to be trained
+- pretrained_model: pretrained model name
 ------------------------------------------------------------------------------'''
-def update_pipeline_config(number_of_labels, model_name):
+def update_pipeline_config(number_of_labels, custom_model, pretrained_model):
     print('Updating pipeline config...')
 
     # Copy Model Config to Training Folder
-    pipeline_config_path = os.path.join(PRETRAINED_MODEL_PATH, PRETRAINED_MODEL_NAME, 'pipeline.config')
-    custom_model_path = os.path.join(API_MODEL_PATH, model_name)
+    pipeline_config_path = os.path.join(PRETRAINED_MODEL_PATH, pretrained_model, 'pipeline.config')
+    custom_model_path = os.path.join(API_MODEL_PATH, custom_model)
     
     if os.path.exists(custom_model_path):
         shutil.rmtree(custom_model_path)
@@ -170,7 +178,7 @@ def update_pipeline_config(number_of_labels, model_name):
     
     pipeline_config.model.ssd.num_classes = number_of_labels
     pipeline_config.train_config.batch_size = 4
-    pipeline_config.train_config.fine_tune_checkpoint = os.path.join(PRETRAINED_MODEL_PATH, PRETRAINED_MODEL_NAME, 'checkpoint', 'ckpt-0')
+    pipeline_config.train_config.fine_tune_checkpoint = os.path.join(PRETRAINED_MODEL_PATH, pretrained_model, 'checkpoint', 'ckpt-0')
     pipeline_config.train_config.fine_tune_checkpoint_type = 'detection'
     pipeline_config.train_input_reader.label_map_path = LABEL_MAP
     pipeline_config.train_input_reader.tf_record_input_reader.input_path[:] = [TRAIN_TF_RECORD]
@@ -184,10 +192,21 @@ def update_pipeline_config(number_of_labels, model_name):
 
     return custom_model_path
 
+'''------------------------------------------------------------------------------
+train
 
-def train(labels, model_name, number_of_trainees):
+Description: Train a model
+Arguments:
+- model: custom model name
+- labels: annotations created in LabelImg
+- folder: image folder
+- sample: number of trainees from image folder
+- pretrained: pretrained model name
+- steps: number of steps in training
+------------------------------------------------------------------------------'''
+def train(model, labels, folder, sample, pretrained, steps):
     # do partition
-    partition(number_of_trainees)
+    partition(folder, sample)
 
     # Create Label Map
     create_label_map(labels)
@@ -196,8 +215,13 @@ def train(labels, model_name, number_of_trainees):
     create_tf_records()
 
     # Update Config for Transfer Learning
-    custom_model_path = update_pipeline_config(len(labels), model_name)
+    custom_model_path = update_pipeline_config(len(labels), model, pretrained)
+    print(custom_model_path)
+
+    if os.name == 'nt':
+        os.system('pip install pycocotools-windows')
+        os.system('pip install gin-config') 
+        os.system('pip install tensorflow-addons')
 
     # Train
-    NUM_TRAIN_STEPS = 2000
-    os.system('python {} --model_dir={} --pipeline_config_path={} --num_train_steps={}'.format(TRAINING_SCRIPT, custom_model_path, os.path.join(custom_model_path, 'pipeline.config'), NUM_TRAIN_STEPS))
+    os.system('python {} --model_dir={} --pipeline_config_path={} --num_train_steps={}'.format(TRAINING_SCRIPT, custom_model_path, os.path.join(custom_model_path, 'pipeline.config'), steps))
